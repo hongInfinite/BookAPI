@@ -14,9 +14,9 @@ bookRouter.route('/Books')
 app.use('/api', bookRouter);
 
 app.get('/', function(req, res){
-    res.send('welcome to my API!');
+    res.send('welcome to my API - pushed!');
 })
 
 app.listen(port, function(){
-    console.log('Gulping is running my app on PORTddd: ' + port);
+    console.log('Gulping is running my app on PORT: ' + port);
 })
