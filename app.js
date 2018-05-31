@@ -29,9 +29,9 @@ var config =
            , encrypt: true
         }
    }
-var connection = new dbSQLConnection(config);
-// Attempt to connect and execute queries if connection goes through
-connection.on('connect', function(err) 
+var dbSQLConnection = new dbSQLConnection(config);
+// Attempt to connect and execute queries if dbSQLConnection goes through
+dbSQLConnection.on('connect', function(err) 
    {
      if (err) 
        {
@@ -45,112 +45,7 @@ connection.on('connect', function(err)
    }
  );
 
-var bookRouter = express.Router();
-bookRouter.route('/BooksFromMongo')
-    .post(function(req, res, next){
-        // var book = new Book(req.body);
-        // console.log(book);
-        // res.send(book);
-        console.log(req.body)
-        var book = new Book({
-            title: req.body.title,
-            author: req.body.author,
-            genre: req.body.genre,
-            read: req.body.read
-        });
-
-        book
-            .save()
-            .then(result => {
-                console.log(result);
-            })
-            .catch(err => console.log(err));
-        res.status(201).json({
-            message: "Handling POST requests to /Books",
-            //createdBook: book
-        })
-    })
-    .get(function(req, res){
-        var responseJson = {hello: "This is my api Json"};
-        Book.find({}, function(err, books){
-            if(err)
-                //console.log(err)
-                res.status(500).send(err);
-            else {
-                res.json(books);
-                // if(books.length == 0)
-                //     res.send('0 record found.');
-                // else
-                //     res.send('some record found.');             
-            }
-                
-        })
-        // res.json(responseJson)
-    })
-
-bookRouter.route('/BooksFromAzureSQL')
-    .post(function(req, res, next){
-        // var book = new Book(req.body);
-        // console.log(book);
-        // res.send(book);
-        console.log(req.body)
-        var book = new Book({
-            title: req.body.title,
-            author: req.body.author,
-            genre: req.body.genre,
-            read: req.body.read
-        });
-
-        book
-            .save()
-            .then(result => {
-                console.log(result);
-            })
-            .catch(err => console.log(err));
-        res.status(201).json({
-            message: "Handling POST requests to /Books",
-            //createdBook: book
-        })
-    })
-    .get(function(req, res){
-        var responseJson = {hello: "This is my api Json"};
-        var responseText = "";
-        // Book.find({}, function(err, books){
-        //     if(err)
-        //         //console.log(err)
-        //         res.status(500).send(err);
-        //     else {
-        //         res.json(books);
-        //         // if(books.length == 0)
-        //         //     res.send('0 record found.');
-        //         // else
-        //         //     res.send('some record found.');             
-        //     }
-                
-        // })
-        console.log('Reading rows from the Table...');
-
-       // Read all rows from table
-        var request = new dbSQLRequest(
-            "SELECT TOP 20 pc.Name as CategoryName, p.name as ProductName FROM [SalesLT].[ProductCategory] pc JOIN [SalesLT].[Product] p ON pc.productcategoryid = p.productcategoryid",
-                function(err, rowCount, rows) 
-                    {
-                        console.log(rowCount + ' row(s) returned');
-                        process.exit();
-                    }
-                );
-
-        request.on('row', function(columns) {
-            columns.forEach(function(column) {
-                console.log("%s\t%s", column.metadata.colName, column.value);
-                // responseText = responseText + column.metadata.colName + "\t" + column.value + "\n";
-            });
-        });
-        connection.execSql(request);
-        // console.log(responseText)
-        res.json(responseJson)
-        // res.send(responseText)
-    })
+bookRouter = require('./routes/bookRoutes')(Book, dbSQLRequest, dbSQLConnection);
 
 app.use('/api', bookRouter);
 
