@@ -19,48 +19,9 @@ var routes = function(Book, dbSQLRequest, dbSQLConnection){
         });
     });
 
+    var bookController = require('../controllers/bookController')(Book)
     bookRouter.route('/BooksFromMongo')
-        .post(function(req, res, next){
-            // var book = new Book(req.body);
-            // console.log(book);
-            // res.send(book);
-            console.log(req.body)
-            var book = new Book({
-                title: req.body.title,
-                author: req.body.author,
-                genre: req.body.genre,
-                read: req.body.read
-            });
-    
-            book
-                .save()
-                .then(result => {
-                    console.log(result);
-                })
-                .catch(err => console.log(err));
-            res.status(201).json({
-                message: "Handling POST requests to /Books",
-                //createdBook: book
-            })
-        })
-        .get(function(req, res){
-            var responseJson = {hello: "This is my api Json"};
-            Book.find({}, function(err, books){
-                if(err)
-                    //console.log(err)
-                    res.status(500).send(err);
-                else {
-                    res.json(books);
-                    // if(books.length == 0)
-                    //     res.send('0 record found.');
-                    // els  e
-                    //     res.send('some record found.');             
-                }
-            })
-            // res.json(responseJson)
-        })
-
-        bookRouter.route('/BooksFromMongo/:bookID')
+        .post(bookController.post)        
         // .post(function(req, res, next){
         //     // var book = new Book(req.body);
         //     // console.log(book);
@@ -84,6 +45,25 @@ var routes = function(Book, dbSQLRequest, dbSQLConnection){
         //         //createdBook: book
         //     })
         // })
+        .get(bookController.get)
+        // .get(function(req, res){
+        //     var responseJson = {hello: "This is my api Json"};
+        //     Book.find({}, function(err, books){
+        //         if(err)
+        //             //console.log(err)
+        //             res.status(500).send(err);
+        //         else {
+        //             res.json(books);
+        //             // if(books.length == 0)
+        //             //     res.send('0 record found.');
+        //             // els  e
+        //             //     res.send('some record found.');             
+        //         }
+        //     })
+        //     // res.json(responseJson)
+        // })
+
+    bookRouter.route('/BooksFromMongo/:bookID')
         .get(function(req, res){
             res.json(req.book);
         })  
@@ -111,7 +91,25 @@ var routes = function(Book, dbSQLRequest, dbSQLConnection){
                 else
                     res.json(req.book);
             });
-        });      
+        })
+        .delete(function(req, res){
+            req.book.remove(function(err){
+                if(err){
+                    res.status(201).json({
+                        message: "Handling DELETE request to /Books have issue in ERR.",
+                        //createdBook: book
+                    })                    
+                    // res.status(500).send(err);
+                }
+                else{
+                    res.status(201).json({
+                        message: "Handling DELETE request to /Books have issue in ELSE.",
+                        //createdBook: book
+                    })                    
+                    // res.status(204).send('Removed');
+                }
+            })         
+        });
 
     bookRouter.route('/BooksFromAzureSQL')
         .post(function(req, res, next){
